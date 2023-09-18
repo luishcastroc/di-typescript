@@ -30,11 +30,14 @@ export function createMyComponent(
     // Fetch any custom metadata (e.g., decorators like @Optional, @Self etc.) applied to the dependency.
     const metadata = getMetadata(ComponentType, index);
 
+    // Use custom token if available, otherwise use type metadata
+    const token = metadata?.provider || param;
+
     // If custom metadata exists.
     if (metadata) {
       try {
         // Attempt to resolve the provider using the injector.
-        provider = injector.getProvider(param, metadata, hostOnly);
+        provider = injector.getProvider(token, metadata, hostOnly);
 
         // Handle @Self decorator scenario
         if (metadata.self && provider === undefined) {
@@ -54,7 +57,7 @@ export function createMyComponent(
       if (manualDeps[index] instanceof Object) {
         provider = manualDeps[index];
       } else {
-        provider = injector.getProvider(manualDeps[index] || param);
+        provider = injector.getProvider(manualDeps[index] || token);
       }
     }
 

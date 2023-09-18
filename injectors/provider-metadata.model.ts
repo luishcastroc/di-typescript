@@ -3,4 +3,6 @@ export interface ProviderMetadata {
   self?: boolean;
   skipSelf?: boolean;
   host?: boolean;
+  provider?: any;
+  isEnvironmentInjector?: boolean;
 }

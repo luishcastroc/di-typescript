@@ -1,12 +1,14 @@
 import { createMyComponent } from './create-component';
-import { Host, Optional, Self, SkipSelf } from './decorators';
+import { Host, Inject, Optional, Self, SkipSelf } from './decorators';
 import ElementInjector from './injectors/element-injector';
+import { EnvironmentInjector } from './injectors/environment-injector';
 import Injector from './injectors/injector';
 import ModuleInjector from './injectors/module-injector';
 import NullInjector from './injectors/null-injector';
 import { DebugService } from './services/debug.service';
 import { HeroService } from './services/hero.service';
 import { LoggerService } from './services/logger.service';
+import { MutantsService } from './services/mutants.service';
 import { SidekickService } from './services/sidekick.service';
 import { VillainService } from './services/villain.service';
 
@@ -15,6 +17,8 @@ const appDiv: HTMLElement = document.getElementById('app');
 class MyComponent {
   constructor(
     private heroService: HeroService,
+    @Inject(EnvironmentInjector)
+    private environmentInjector: EnvironmentInjector,
     @SkipSelf() private loggerService: LoggerService,
     @Self() private villainService?: VillainService,
     @Optional() public sideKicksService?: SidekickService,
@@ -41,6 +45,9 @@ class MyComponent {
       this.debugService.printName();
       appDiv.innerHTML += `<p>Debug: Check the console</p>`;
     }
+
+    const mutantsService = this.environmentInjector.getProvider(MutantsService);
+    console.log(mutantsService.getMutant());
   }
 }
 
@@ -75,11 +82,17 @@ elementInjector.addProvider(VillainService, new VillainService());
 // console.log('Element Injector Providers:', [...elementInjector['_providers'].keys()]);
 // console.log('Module Injector Providers:', [...moduleInjector['_providers'].keys()]);
 
+//Create a new Environment Injector used to provide dependencies to standalone components, lazy-loaded routes, and other parts of your application that are not part of the component hierarchy
+const environmentInjector = new EnvironmentInjector(rootInjector);
+
+// Register a provider with the environment injector
+environmentInjector.addProvider(MutantsService, new MutantsService());
+
 // Create and initialize the component
 const myComponent = createMyComponent(
   MyComponent,
   elementInjector,
-  [new HeroService()],
+  [new HeroService(), environmentInjector],
   true
 );
 myComponent.ngOnInit();

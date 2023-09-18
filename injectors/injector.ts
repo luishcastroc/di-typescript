@@ -27,6 +27,15 @@ export default class Injector {
   }
 
   /**
+   * Gets the map of registered providers.
+   *
+   * @returns {Map<any, any>} The map of providers to their associated instances.
+   */
+  public getProviders(): Map<any, any> {
+    return this._providers;
+  }
+
+  /**
    * Retrieves the root instance of the Injector.
    *
    * @returns {Injector} The root injector instance.
@@ -36,6 +45,18 @@ export default class Injector {
       this._rootInstance = new Injector();
     }
     return this._rootInstance;
+  }
+
+  /**
+   * Resolves a dependency based on the token.
+   *
+   * @template T - Type of the provider.
+   * @param {any} token - The token used to look up the provider.
+   * @returns {T | undefined} - Instance associated with the provider or undefined if not found.
+   */
+  static resolve<T>(token: any): T | undefined {
+    const rootInstance = this.getRootInstance();
+    return rootInstance.getProvider(token);
   }
 
   /**
