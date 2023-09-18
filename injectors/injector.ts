@@ -11,6 +11,9 @@ export default class Injector {
   /** A map of providers to their associated instances. */
   private _providers: Map<any, any> = new Map();
 
+  /** A map of view providers to their associated instances. */
+  private _viewProviders: Map<any, any> = new Map();
+
   /** The parent injector, or a null injector if this is the root. */
   private _parent: Injector | NullInjector;
 
@@ -40,9 +43,18 @@ export default class Injector {
    *
    * @param {any} provider - The provider to register.
    * @param {any} value - The instance associated with the provider.
+   * @param {boolean} isViewProvider - If the provider is a viewProvider or not
    */
-  addProvider(provider: any, value: any): void {
-    this._providers.set(provider, value);
+  addProvider(
+    provider: any,
+    value: any,
+    isViewProvider: boolean = false
+  ): void {
+    if (isViewProvider) {
+      this._viewProviders.set(provider, value);
+    } else {
+      this._providers.set(provider, value);
+    }
   }
 
   /**
@@ -74,11 +86,12 @@ export default class Injector {
     // If 'host' metadata is true and hostOnly flag is set
     if (metadata.host && hostOnly) {
       return (
-        this._providers.get(provider) ||
+        this._viewProviders.get(provider) ||
         this._parent.getProvider(provider, { self: true }, true)
       );
     } else {
-      value = this._providers.get(provider);
+      value =
+        this._providers.get(provider) || this._viewProviders.get(provider);
     }
 
     if (value) return value;

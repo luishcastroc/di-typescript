@@ -58,7 +58,11 @@ elementInjector.addProvider(
   LoggerService,
   new LoggerService('Element Provider')
 );
-elementInjector.addProvider(DebugService, new DebugService('Element Provider'));
+elementInjector.addProvider(
+  DebugService,
+  new DebugService('Element Provider from ViewProviders'),
+  true
+); // Register as a ViewProvider
 elementInjector.addProvider(VillainService, new VillainService());
 
 // Uncomment to inspect the providers in the element and module injector
@@ -66,9 +70,12 @@ elementInjector.addProvider(VillainService, new VillainService());
 // console.log('Module Injector Providers:', [...moduleInjector['_providers'].keys()]);
 
 // Create and initialize the component
-const myComponent = createMyComponent(MyComponent, elementInjector, [
-  new HeroService(),
-]);
+const myComponent = createMyComponent(
+  MyComponent,
+  elementInjector,
+  [new HeroService()],
+  true
+);
 myComponent.ngOnInit();
 
 // Uncomment these for debugging DI hierarchy
