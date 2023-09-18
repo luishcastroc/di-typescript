@@ -23,6 +23,7 @@ class MyComponent {
     // Fetch hero, sidekick, villain and logger info
     console.log(this.heroService.getHero());
     if (this.sideKicksService) {
+      document;
       console.log(this.sideKicksService.getSidekick());
     }
     if (this.villainService) {
