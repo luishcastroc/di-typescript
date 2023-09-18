@@ -10,6 +10,8 @@ import { LoggerService } from './services/logger.service';
 import { SidekickService } from './services/sidekick.service';
 import { VillainService } from './services/villain.service';
 
+const appDiv: HTMLElement = document.getElementById('app');
+
 class MyComponent {
   constructor(
     private heroService: HeroService,
@@ -20,21 +22,24 @@ class MyComponent {
   ) {}
 
   ngOnInit() {
-    // Fetch hero, sidekick, villain and logger info
-    console.log(this.heroService.getHero());
+    appDiv.innerHTML += `<p>Hero: ${this.heroService.getHero()}</p>`;
+
     if (this.sideKicksService) {
-      document;
-      console.log(this.sideKicksService.getSidekick());
+      appDiv.innerHTML += `<p>Sidekick: ${this.sideKicksService.getSidekick()}</p>`;
     }
+
     if (this.villainService) {
-      console.log(this.villainService.getVillain());
+      appDiv.innerHTML += `<p>Villain: ${this.villainService.getVillain()}</p>`;
     }
+
     if (this.loggerService) {
       this.loggerService.printName();
+      appDiv.innerHTML += `<p>Logger: Check the console`;
     }
+
     if (this.debugService) {
-      // New addition
       this.debugService.printName();
+      appDiv.innerHTML += `<p>Debug: Check the console</p>`;
     }
   }
 }
