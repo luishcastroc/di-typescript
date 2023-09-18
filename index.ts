@@ -1,52 +1,77 @@
+import { createMyComponent } from './create-component';
+import { Host, Optional, Self, SkipSelf } from './decorators';
 import ElementInjector from './injectors/element-injector';
 import Injector from './injectors/injector';
 import ModuleInjector from './injectors/module-injector';
 import NullInjector from './injectors/null-injector';
-import HeroService from './services/hero.service';
+import { DebugService } from './services/debug.service';
+import { HeroService } from './services/hero.service';
+import { LoggerService } from './services/logger.service';
+import { SidekickService } from './services/sidekick.service';
+import { VillainService } from './services/villain.service';
 
 class MyComponent {
-  constructor(private heroService: HeroService) {}
+  constructor(
+    private heroService: HeroService,
+    @SkipSelf() private loggerService: LoggerService,
+    @Self() private villainService?: VillainService,
+    @Optional() public sideKicksService?: SidekickService,
+    @Host() public debugService?: DebugService
+  ) {}
 
   ngOnInit() {
+    // Fetch hero, sidekick, villain and logger info
     console.log(this.heroService.getHero());
+    if (this.sideKicksService) {
+      console.log(this.sideKicksService.getSidekick());
+    }
+    if (this.villainService) {
+      console.log(this.villainService.getVillain());
+    }
+    if (this.loggerService) {
+      this.loggerService.printName();
+    }
+    if (this.debugService) {
+      // New addition
+      this.debugService.printName();
+    }
   }
 }
 
-// Create a null injector.
-// A null injector is a special injector that does not have any providers registered with it.
+// Special injector without providers
 const nullInjector = new NullInjector();
 
-// Create a root injector.
-// The root injector is the top-level injector in the injector hierarchy.
+// Top-level injector; parent of all injectors
 const rootInjector = new Injector(nullInjector);
 
-// Register the HeroService provider with the root injector.
-// This makes the HeroService available to all injectors in the injector hierarchy.
-//rootInjector.addProvider('HeroService', new HeroService());
-
-// Create a module injector.
-// A module injector is a child of the root injector. It is used to provide dependencies to components within a specific module.
+// Module injector, a child of the root, provides dependencies for a module
 const moduleInjector = new ModuleInjector(rootInjector);
 
-// Register the HeroService provider with the module injector.
-// This overrides the HeroService provider that was registered with the root injector.
-// This means that components within the module will receive the HeroService instance that is registered with the module injector.
-moduleInjector.addProvider('HeroService', new HeroService());
+// Service registration for the module scope
+moduleInjector.addProvider(LoggerService, new LoggerService('Module Provider'));
+moduleInjector.addProvider(DebugService, new DebugService('Module Provider'));
+moduleInjector.addProvider(HeroService, new HeroService());
 
-// Create an element injector.
-// An element injector is a child of the module injector. It is used to provide dependencies to components and directives within a specific DOM element.
+// Element injector, a child of the module, provides dependencies for components in a DOM element
 const elementInjector: Injector = new ElementInjector(moduleInjector);
+elementInjector.addProvider(
+  LoggerService,
+  new LoggerService('Element Provider')
+);
+elementInjector.addProvider(DebugService, new DebugService('Element Provider'));
+elementInjector.addProvider(VillainService, new VillainService());
 
-// Create a new instance of the MyComponent class.
-// The MyComponent class will be injected with the HeroService instance that is registered with the element injector.
-const myComponent = new MyComponent(elementInjector.getProvider('HeroService'));
+// Uncomment to inspect the providers in the element and module injector
+// console.log('Element Injector Providers:', [...elementInjector['_providers'].keys()]);
+// console.log('Module Injector Providers:', [...moduleInjector['_providers'].keys()]);
 
-// Call the ngOnInit() method on the MyComponent class.
-// This will log the hero service's hero name to the console.
+// Create and initialize the component
+const myComponent = createMyComponent(MyComponent, elementInjector, [
+  new HeroService(),
+]);
 myComponent.ngOnInit();
 
-// Print all injectors in the console.
-// This is helpful for debugging dependency injection issues.
+// Uncomment these for debugging DI hierarchy
 // console.log('Null injector:', nullInjector);
 // console.log('Root injector:', rootInjector);
 // console.log('Module injector:', moduleInjector);
